@@ -1,0 +1,14 @@
+name: intake-esm-tools
+
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - ecgtools
+  - dask 
+  - xarray 
+  - netcdf4 
+  - intake-esm
+  - pandas 
+  - numpy 
+  - tqdm
