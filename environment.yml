@@ -5,6 +5,7 @@ dependencies:
   - ecgtools=2024.7.31
   - intake=2.0.8
   - intake-esm=2025.2.3
+  - ipykernel=6.29.5
   - python=3.10.16
   - netcdf4==1.7.2
   - numpy==2.2.4
