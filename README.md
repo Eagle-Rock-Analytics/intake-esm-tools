@@ -9,32 +9,34 @@ Code for building and maintaining intake-ESM catalogs
 
 ## 🛠️ Guide to the `ecgtools` Builder Class 
 
-The primary function of the `Builder` class is to create catalogs from lists of netCDF files or Zarr stores. It "crawls" through your data directories for you, looking for file paths using the information you have specified. You can refer to the official documentation [here](https://ecgtools.readthedocs.io/en/latest/reference/index.html#builder), but I'll also provide a brief overview and additional notes below. 📚
+The primary function of the `Builder` class is to create catalogs from lists of netCDF files or Zarr stores. It "crawls" through your data directories for you, looking for file paths using the information you have specified. You can refer to the official documentation [here](https://ecgtools.readthedocs.io/en/latest/reference/index.html#builder), but a brief overview and additional notes are provided below. 📚
 
 ### 📝 Nicole's notes on the Builder class 
 
 Let’s say you have an **S3 bucket** named `salsa_cities` 💃, which contains a CSV file and two directories: `new_york` and `miami`. Each of these directories contains **Zarr stores** with climate data specific to their locations. It's important to remember that Zarr stores are **not files**; they are storage structures represented as **directories** in the S3 file system. Each Zarr store consists of several nested directories and metadata files. In this case, `precip/`, `x/`, `y/`, and `time/` are directories within the Zarr store.
 
-> **salsa_cities/** <br>
-  ├── **new_york/** <br>
-  &nbsp;&nbsp;&nbsp;&nbsp;├── **precip/** <br>
-  &nbsp;&nbsp;&nbsp;&nbsp;├── **temp/** <br>
-  &nbsp;&nbsp;&nbsp;&nbsp;├── **x/** <br>
-  &nbsp;&nbsp;&nbsp;&nbsp;└── **y/** <br>
-  &nbsp;&nbsp;&nbsp;&nbsp;└── **time/** <br>
-  &nbsp;&nbsp;&nbsp;&nbsp;└── *.zattrs* <br>
-  &nbsp;&nbsp;&nbsp;&nbsp;└── *.zgroup* <br>
-  &nbsp;&nbsp;&nbsp;&nbsp;└── *.zmetadata* <br>
-  └── **miami/** <br>
-  &nbsp;&nbsp;&nbsp;&nbsp;├── **precip/** <br>
-  &nbsp;&nbsp;&nbsp;&nbsp;├── **temp/** <br>
-  &nbsp;&nbsp;&nbsp;&nbsp;├── **x/** <br>
-  &nbsp;&nbsp;&nbsp;&nbsp;└── **y/** <br>
-  &nbsp;&nbsp;&nbsp;&nbsp;└── **time/** <br>
-  &nbsp;&nbsp;&nbsp;&nbsp;└── *.zattrs* <br>
-  &nbsp;&nbsp;&nbsp;&nbsp;└── *.zgroup* <br>
-  &nbsp;&nbsp;&nbsp;&nbsp;└── *.zmetadata* <br>
-  └── *best_cities_to_salsa_dance.csv* <br>
+```plaintext
+salsa_cities/
+├── new_york/
+│   ├── precip/
+│   ├── temp/
+│   ├── x/
+│   ├── y/
+│   ├── time/
+│   ├── .zattrs
+│   ├── .zgroup
+│   └── .zmetadata
+├── miami/
+│   ├── precip/
+│   ├── temp/
+│   ├── x/
+│   ├── y/
+│   ├── time/
+│   ├── .zattrs
+│   ├── .zgroup
+│   └── .zmetadata
+└── best_cities_to_salsa_dance.csv
+```
 
 Each Zarr store includes the following structure: 
 
