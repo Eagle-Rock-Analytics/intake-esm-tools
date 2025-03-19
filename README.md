@@ -1,5 +1,5 @@
 # intake-esm-tools
-Code for building and maintaining intake-ESM catalogs
+Code and documentation for building intake-ESM catalogs
 
 ## 🔗 Useful Resources  
 - 📄 **Building a Custom Parser with `ecgtools`**:  
