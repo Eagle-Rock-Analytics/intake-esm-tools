@@ -7,6 +7,8 @@ The script extracts metadata from S3 file paths, filters datasets based on prede
 criteria, and generates a structured catalog in CSV and JSON formats. This catalog 
 allows for efficient querying and dataset management.
 
+Top level URL for renewables s3: https://wfclimres.s3.amazonaws.com/index.html
+
 Attributes
 ----------
 CAT_DIRECTORY : str
