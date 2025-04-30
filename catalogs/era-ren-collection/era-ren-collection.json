@@ -65,6 +65,6 @@
   "id": "era-ren-collection",
   "description": "Eagle Rock Analytics Renewables Data Catalog",
   "title": null,
-  "last_updated": "2025-03-19T23:04:15Z",
-  "catalog_file": "file:///Users/nicolekeeney/code/intake-esm-tools/intake-esm-tools/../catalogs/era-ren-collection/era-ren-collection.csv"
+  "last_updated": "2025-04-30T18:32:36Z",
+  "catalog_file": "file:///Users/nicolekeeney/code/intake-esm-tools/code/scripts/../../catalogs/era-ren-collection/era-ren-collection.csv"
 }
