@@ -1,6 +1,6 @@
 # Documentation for `ecgtools` 
 
-`ecgtools` is an open source python package for building intake-ESM catalogs. The package itself is fairly well documented (see their documentation [here](https://ecgtools.readthedocs.io/en/latest/index.html)), but some additional documentation and notes on using this package are included in this README to better detail how/why this package functions. 
+`ecgtools` is an open source python package for building intake-ESM catalogs. The package itself is fairly well documented (see their documentation [here](https://ecgtools.readthedocs.io/en/latest/index.html)), but some additional documentation and notes on using this package are included in this README to better detail how this package functions. 
 
 ## 🔗 Useful Resources  
 - 📄 **Building a Custom Parser with `ecgtools`**:  
