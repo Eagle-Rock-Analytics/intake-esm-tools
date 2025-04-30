@@ -1,0 +1,20 @@
+# Check for Black formatting on push and pull request 
+# Based on documentation from https://black.readthedocs.io/en/stable/integrations/github_actions.html
+
+name: Lint
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Install Black with Colorama
+        run: pip install "black[colorama]==24.10.0"
+      - name: Run Black
+        run: black --check --verbose .
