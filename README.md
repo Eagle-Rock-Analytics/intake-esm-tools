@@ -1,6 +1,6 @@
 # intake-esm-tools
 
-This repository contains code and documentation for building and maintaining [intake-esm](https://intake-esm.readthedocs.io/en/stable/) catalogs for Eagle Rock Analytics' datasets stored in Amazon S3. These catalogs provide a scalable, schema-driven interface to search, load, and analyze large collections of NetCDF or Zarr files.
+This repository contains code and documentation for building and maintaining [intake-esm](https://intake-esm.readthedocs.io/en/stable/) catalogs for Eagle Rock Analytics datasets stored in Amazon S3. These catalogs provide a scalable, schema-driven interface to search, load, and analyze large collections of NetCDF or Zarr files.
 
 The catalogs built here enable consistent and shareable data access across projects and users, supporting internal research and application development with cloud-optimized datasets.
 
