@@ -2,14 +2,17 @@ name: intake-esm-tools
 channels:
   - conda-forge
 dependencies:
+  - python=3.10.16
   - ecgtools=2024.7.31
   - intake=2.0.8
   - intake-esm=2025.2.3
   - ipykernel=6.29.5
-  - python=3.10.16
+  - pip=24.0
   - netcdf4==1.7.2
   - numpy==2.2.4
   - pandas==2.2.3
   - s3fs==2025.3.0
   - tqdm==4.67.1
   - xarray=2025.1.2
+  - pip:
+    - black==24.10.0
