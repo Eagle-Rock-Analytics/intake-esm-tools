@@ -225,7 +225,7 @@ def main():
 
     print("Building catalog...")
     print(
-        "This step may take a few minutes to run as ecgtools crawls through the s3 catalog..."
+        "WARNING: this step may take a few minutes to run as ecgtools crawls through the s3 catalog."
     )
     ren_builder = build_catalog()
     print("Catalog building complete.")
