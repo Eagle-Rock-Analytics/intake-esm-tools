@@ -4,6 +4,21 @@ This repository contains code and documentation for building and maintaining [in
 
 The catalogs built here enable consistent and shareable data access across projects and users, supporting internal research and application development with cloud-optimized datasets.
 
+
+--- 
+
+## 📥 Basic usage of intake catalogs 
+Intake catalogs can be easily read in using the `intake` catalog: 
+```python
+import intake
+
+# Read from local machine
+intake.open_esm_datastore("catalogs/era-ren-collection/era-ren-collection.json")
+
+# Read from AWS using s3 URI for json file 
+intake.open_esm_datastore("s3_uri")
+```
+
 ---
 
 ## 🗂️ Repository Structure
