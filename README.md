@@ -13,13 +13,14 @@ Intake catalogs can be easily read in using the `intake` catalog. Here's some ex
 import intake
 
 # Read from local machine
-intake.open_esm_datastore("catalogs/era-ren-collection/era-ren-collection.json")
+cat = intake.open_esm_datastore("catalogs/era-ren-collection/era-ren-collection.json")
 
 # Read from AWS using s3 URI for json file 
-intake.open_esm_datastore("https://wfclimres.s3.amazonaws.com/era/era-ren-collection.json")
+cat = intake.open_esm_datastore("https://wfclimres.s3.amazonaws.com/era/era-ren-collection.json")
 ```
 
-You can read in the zarrs using `intake` and `xarray` using the following method: 
+After loading the catalog file, you can then easily subset the catalog and read in the zarrs as `xarray` Dataset objects using the following method: 
+
 ```python
 # Access catalog as dataframe and inspect the first few rows
 cat_df = cat.df
