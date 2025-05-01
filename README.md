@@ -8,7 +8,7 @@ The catalogs built here enable consistent and shareable data access across proje
 --- 
 
 ## 📥 Basic usage of intake catalogs 
-Intake catalogs can be easily read in using the `intake` catalog: 
+Intake catalogs can be easily read in using the `intake` catalog. Here's some example usage using the renewables catalog: 
 ```python
 import intake
 
@@ -17,6 +17,38 @@ intake.open_esm_datastore("catalogs/era-ren-collection/era-ren-collection.json")
 
 # Read from AWS using s3 URI for json file 
 intake.open_esm_datastore("https://wfclimres.s3.amazonaws.com/era/era-ren-collection.json")
+```
+
+You can read in the zarrs using `intake` and `xarray` using the following method: 
+```python
+# Access catalog as dataframe and inspect the first few rows
+cat_df = cat.df
+
+# Form query dictionary
+query = {
+    # GCM name
+    'source_id': 'EC-Earth3',
+    # time period - historical or emissions scenario
+    'experiment_id': ['historical', 'ssp370'],
+    # variable
+    'variable_id': 'cf',
+    # time resolution 
+    'table_id': 'day',
+    # grid resolution: d01 = 45km, d02 = 9km, d03 = 3km
+    'grid_label': 'd03'
+}
+
+# Subset catalog 
+cat_subset = cat.search(**query)
+
+# Get dataset dictionary 
+dsets = cat_subset.to_dataset_dict(
+    xarray_open_kwargs={'consolidated': True},
+    storage_options={'anon': True}
+)
+
+# Display one of the files :) 
+dsets["pv_distributed.WRF.ERA.EC-Earth3.historical.day.d03"]
 ```
 
 ---
