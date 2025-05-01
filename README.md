@@ -16,7 +16,7 @@ import intake
 intake.open_esm_datastore("catalogs/era-ren-collection/era-ren-collection.json")
 
 # Read from AWS using s3 URI for json file 
-intake.open_esm_datastore("s3_uri")
+intake.open_esm_datastore("https://wfclimres.s3.amazonaws.com/era/era-ren-collection.json")
 ```
 
 ---
