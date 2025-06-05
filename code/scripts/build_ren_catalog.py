@@ -280,9 +280,9 @@ def main():
     export_catalog_files(ren_builder, S3_URI, CAT_NAME)
     print("Catalog files successfully created!")
 
-    print("Updating 'catalog_file' key in {CAT_NAME}.json to point to https url...")
+    print(f"Updating 'catalog_file' key in {CAT_NAME}.json to point to https url...")
     update_catalog_file_key(S3_URI, HTTP_URL, CAT_NAME)
-    print("{CAT_NAME}.json successfully modified.")
+    print(f"{CAT_NAME}.json successfully modified.")
 
     end_time = time.time()
     elapsed_time = end_time - start_time
