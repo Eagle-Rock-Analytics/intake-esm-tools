@@ -1,5 +1,5 @@
 """
-build_catalog_renewables.py
+build_ren_catalog.py
 
 Builds an Intake-ESM catalog for ERA renewables data stored in an S3 bucket.
 
@@ -11,8 +11,10 @@ Top level URL for renewables s3: https://wfclimres.s3.amazonaws.com/index.html
 
 Attributes
 ----------
-CAT_DIRECTORY : str
-    Directory where the output catalog files will be stored.
+S3_URI : str
+    s3 directory where the output catalog files will be stored.
+HTTP_URL: str
+    Public HTTPS base URL for catalog files
 CAT_NAME : str
     Name of the catalog files (without file extension).
 
@@ -24,12 +26,14 @@ build_catalog()
     Creates and builds the catalog using `ecgtools.Builder`.
 export_catalog_files(builder, cat_directory, cat_name)
     Saves the catalog as JSON and CSV files.
+ update_catalog_file_key(s3_urihttps_url, cat_name):
+    Update the "catalog_file" key in a JSON catalog stored at an S3 URI.
 main()
     Executes the catalog-building process.
 
 Outputs
 -------
-- `{CAT_NAME}.csv` and `{CAT_NAME}.json` stored in `{CAT_DIRECTORY}`.
+- `{CAT_NAME}.csv` and `{CAT_NAME}.json` stored in `{S3_URI}`.
 
 Examples
 --------
@@ -41,11 +45,14 @@ To build and export the catalog, run:
 
 import traceback
 import time
+import json
+import fsspec
 from ecgtools import Builder
 from ecgtools.builder import INVALID_ASSET, TRACEBACK
 
-CAT_DIRECTORY = (
-    "s3://wfclimres/era"  # Directory to store output files in
+S3_URI = "s3://wfclimres/era"  # Directory to store output files in
+HTTP_URL = (
+    "https://wfclimres.s3.amazonaws.com/era"  # Public HTTPS base URL for catalog files
 )
 CAT_NAME = "era-ren-collection"  # Name to give catalog csv and json files (don't include file extension)
 
@@ -217,7 +224,42 @@ def export_catalog_files(builder, cat_directory, cat_name):
             {"type": "union", "attribute_name": "variable_id"},
         ],
         description="Eagle Rock Analytics Renewables Data Catalog",
+        catalog_type="dict",
     )
+
+
+def update_catalog_file_key(s3_uri: str, https_url: str, cat_name: str) -> None:
+    """
+    Update the "catalog_file" key in a JSON catalog stored at an S3 URI.
+
+    This function modifies an Intake-ESM JSON catalog by injecting (or updating) the "catalog_file"
+    field, which points to a public HTTPS URL for the associated CSV file. This is necessary
+    because Intake-ESM cannot read from S3 URIs (e.g., 's3://bucket/path/file.csv') directly when
+    using the `catalog_file` key. Intake expects a web-accessible HTTPS URL or a local path for public data.
+
+    Parameters
+    ----------
+    s3_uri : str
+        Base S3 URI where the catalog JSON is stored (e.g., 's3://mybucket/catalogs').
+    https_url : str
+        Public HTTPS URL where the CSV catalog will be accessible.
+    cat_name : str
+        Catalog name (used for both JSON and CSV filenames).
+
+    Returns
+    -------
+    None
+        Modifies the JSON file in-place by injecting or updating the "catalog_file" key.
+    """
+    json_path = f"{s3_uri}/{cat_name}.json"
+
+    with fsspec.open(json_path, "r") as f:
+        catalog = json.load(f)
+
+    catalog["catalog_file"] = f"{https_url}/{cat_name}.csv"
+
+    with fsspec.open(json_path, "w") as f:
+        json.dump(catalog, f, indent=2)
 
 
 def main():
@@ -233,10 +275,14 @@ def main():
     print("Catalog building complete.")
 
     print(
-        f"Creating catalog files in directory '{CAT_DIRECTORY}' with name '{CAT_NAME}.csv' and '{CAT_NAME}.json'"
+        f"Creating catalog files in directory '{S3_URI}' with name '{CAT_NAME}.csv' and '{CAT_NAME}.json'"
     )
-    export_catalog_files(ren_builder, CAT_DIRECTORY, CAT_NAME)
+    export_catalog_files(ren_builder, S3_URI, CAT_NAME)
     print("Catalog files successfully created!")
+
+    print("Updating 'catalog_file' key in {CAT_NAME}.json to point to https url...")
+    update_catalog_file_key(S3_URI, HTTP_URL, CAT_NAME)
+    print("{CAT_NAME}.json successfully modified.")
 
     end_time = time.time()
     elapsed_time = end_time - start_time
