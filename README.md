@@ -61,13 +61,9 @@ intake-esm-tools/
 ├── code/
 │   ├── notebooks/         # Jupyter notebooks for exploring and testing catalog logic
 │   └── scripts/           # Python scripts for generating catalog files per project
-├── catalogs/              # Output catalogs (.json, .csv) organized by project name
 ├── environment.yml        # Conda environment definition
 └── README.md
 ```
-
-- **`code/scripts/`**: Scripts for building intake-esm catalogs for different data collections. These typically define the asset structure, variable mapping, and call `intake_esm.build_catalog()` logic.
-- **`catalogs/`**: Stores finalized catalog `.json` and `.csv` files for each project. Each subdirectory corresponds to a specific dataset collection or domain.
 
 ---
 
