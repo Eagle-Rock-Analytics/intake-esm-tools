@@ -61,7 +61,7 @@ intake-esm-tools/
 ├── code/
 │   ├── notebooks/         # Jupyter notebooks for exploring and testing catalog logic
 │   └── scripts/           # Python scripts for generating catalog files per project
-├── environment.yml        # Conda environment definition
+├── environment.yml        # Conda environment file
 └── README.md
 ```
 
