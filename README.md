@@ -13,7 +13,7 @@ Intake catalogs can be easily read in using the `intake` catalog. Here's some ex
 import intake
 
 # Read from local machine
-cat = intake.open_esm_datastore("catalogs/era-ren-collection/era-ren-collection.json")
+cat = intake.open_esm_datastore("code/notebooks/era-ren-collection.json")
 
 # Read from AWS using s3 URI for json file 
 cat = intake.open_esm_datastore("https://wfclimres.s3.amazonaws.com/era/era-ren-collection.json")
@@ -61,13 +61,9 @@ intake-esm-tools/
 ├── code/
 │   ├── notebooks/         # Jupyter notebooks for exploring and testing catalog logic
 │   └── scripts/           # Python scripts for generating catalog files per project
-├── catalogs/              # Output catalogs (.json, .csv) organized by project name
-├── environment.yml        # Conda environment definition
+├── environment.yml        # Conda environment file
 └── README.md
 ```
-
-- **`code/scripts/`**: Scripts for building intake-esm catalogs for different data collections. These typically define the asset structure, variable mapping, and call `intake_esm.build_catalog()` logic.
-- **`catalogs/`**: Stores finalized catalog `.json` and `.csv` files for each project. Each subdirectory corresponds to a specific dataset collection or domain.
 
 ---
 
