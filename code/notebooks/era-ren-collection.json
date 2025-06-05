@@ -1,0 +1,70 @@
+{
+  "esmcat_version": "0.0.1",
+  "attributes": [
+    {
+      "column_name": "installation",
+      "vocabulary": ""
+    },
+    {
+      "column_name": "activity_id",
+      "vocabulary": ""
+    },
+    {
+      "column_name": "institution_id",
+      "vocabulary": ""
+    },
+    {
+      "column_name": "source_id",
+      "vocabulary": ""
+    },
+    {
+      "column_name": "experiment_id",
+      "vocabulary": ""
+    },
+    {
+      "column_name": "table_id",
+      "vocabulary": ""
+    },
+    {
+      "column_name": "variable_id",
+      "vocabulary": ""
+    },
+    {
+      "column_name": "grid_label",
+      "vocabulary": ""
+    },
+    {
+      "column_name": "path",
+      "vocabulary": ""
+    }
+  ],
+  "assets": {
+    "column_name": "path",
+    "format": "zarr",
+    "format_column_name": null
+  },
+  "aggregation_control": {
+    "variable_column_name": "variable_id",
+    "groupby_attrs": [
+      "installation",
+      "activity_id",
+      "institution_id",
+      "source_id",
+      "experiment_id",
+      "table_id",
+      "grid_label"
+    ],
+    "aggregations": [
+      {
+        "type": "union",
+        "attribute_name": "variable_id",
+        "options": {}
+      }
+    ]
+  },
+  "id": "era-ren-collection",
+  "description": "Eagle Rock Analytics Renewables Data Catalog",
+  "title": null,
+  "last_updated": "2025-06-05T23:16:18Z",
+  "catalog_file": "file:///Users/nicolekeeney/code/intake-esm-tools/code/notebooks/era-ren-collection.csv"
+}
