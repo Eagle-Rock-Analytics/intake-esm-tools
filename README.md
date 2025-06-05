@@ -13,7 +13,7 @@ Intake catalogs can be easily read in using the `intake` catalog. Here's some ex
 import intake
 
 # Read from local machine
-cat = intake.open_esm_datastore("catalogs/era-ren-collection/era-ren-collection.json")
+cat = intake.open_esm_datastore("code/notebooks/era-ren-collection.json")
 
 # Read from AWS using s3 URI for json file 
 cat = intake.open_esm_datastore("https://wfclimres.s3.amazonaws.com/era/era-ren-collection.json")
