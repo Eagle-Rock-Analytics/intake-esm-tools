@@ -45,7 +45,7 @@ from ecgtools import Builder
 from ecgtools.builder import INVALID_ASSET, TRACEBACK
 
 CAT_DIRECTORY = (
-    "../../catalogs/era-ren-collection"  # Directory to store output files in
+    "s3://wfclimres/era"  # Directory to store output files in
 )
 CAT_NAME = "era-ren-collection"  # Name to give catalog csv and json files (don't include file extension)
 
@@ -123,8 +123,8 @@ def parse_ae_ren_data(filepath):
     # Add filepath info to dictionary
     info = {
         "installation": installation,
-        "activity_id": "WRF",
-        "institution_id": "ERA",
+        "activity_id": "wrf",
+        "institution_id": "era",
         "source_id": simulation_dict[source_id],
         "experiment_id": experiment_id,
         "table_id": table_id,
