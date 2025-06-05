@@ -123,8 +123,8 @@ def parse_ae_ren_data(filepath):
     # Add filepath info to dictionary
     info = {
         "installation": installation,
-        "activity_id": "wrf",
-        "institution_id": "era",
+        "activity_id": "WRF",
+        "institution_id": "ERA",
         "source_id": simulation_dict[source_id],
         "experiment_id": experiment_id,
         "table_id": table_id,
