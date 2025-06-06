@@ -224,7 +224,6 @@ def export_catalog_files(builder, cat_directory, cat_name):
             {"type": "union", "attribute_name": "variable_id"},
         ],
         description="Eagle Rock Analytics Renewables Data Catalog",
-        # catalog_type="dict",
     )
 
 
