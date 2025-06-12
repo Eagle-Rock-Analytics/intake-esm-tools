@@ -22,6 +22,7 @@ CAT_NAME : str
 import traceback
 import time
 import inspect
+import s3fs
 from ecgtools import Builder
 from ecgtools.builder import INVALID_ASSET, TRACEBACK
 from utils import update_catalog_file_key
@@ -56,7 +57,7 @@ def parse_hdp_data(filepath):
     """
     try:
         # Get the data info from the filepath
-        network, station_id = filepath.split(S3_URI + "/")[1].split("/")
+        network, station_id, _ = filepath.split(S3_URI + "/")[1].split("/")
         # Remove .zmetadata from the filepath, since the actual path to the zarr doesn't include this
         filepath = filepath.split(".zmetadata")[0]
     except Exception as e:
@@ -70,9 +71,43 @@ def parse_hdp_data(filepath):
     return info
 
 
-def init_builder():
+def get_zarr_paths():
+    """
+    Retrieve paths to zarr stores for each HDP station using fs.glob
+
+    Returns
+    --------
+    list of string
+        Paths to zarr stores for each station
+
+    """
+    print(f"{inspect.currentframe().f_code.co_name}: Starting...")
+    print(
+        "Warning: This function may take a while as it crawls through the s3 bucket looking for files"
+    )
+
+    fs = s3fs.S3FileSystem()
+    glob_s3 = fs.glob(f"{S3_URI}/**/**/.zmetadata")
+    zarr_paths = [
+        "s3://" + file.split(".zmetadata")[0] for file in glob_s3
+    ]  # Remove .zmetadata from the path
+    zarr_paths = [
+        path for path in zarr_paths if "VALLEYWATER" not in path
+    ]  # Remove VALLEYWATER stations
+
+    print(f"{inspect.currentframe().f_code.co_name}: Completed successfully")
+
+    return zarr_paths
+
+
+def init_builder(zarr_paths):
     """
     Initializes the ecgtools Builder object with crawl settings for HDP.
+
+    Parameters
+    ----------
+    zarr_paths: list of string
+        Paths to zarr stores for each station
 
     Returns
     -------
@@ -81,16 +116,9 @@ def init_builder():
     """
     print(f"{inspect.currentframe().f_code.co_name}: Starting...")
 
-    exclude_patterns = [
-        "**/VALLEYWATER/**",
-        "**/eraqc_counts_native_timestep/**",
-        "**/eraqc_counts_hourly_timestep/**",
-        "**/merge_logs/**",
-    ]  # Glob patterns to exclude (don't crawl through these directories or include these files)
     builder = Builder(
-        paths=[S3_URI],
-        depth=2,  # Crawl through 2 directories
-        exclude_patterns=exclude_patterns,
+        paths=zarr_paths,
+        depth=0,  # No crawling
         include_patterns=["**/.zmetadata"],  # Glob patterns to include
     )
     print(f"{inspect.currentframe().f_code.co_name}: Completed successfully")
@@ -136,6 +164,9 @@ def export_catalog_files(builder, cat_directory, cat_name):
 
     """
     print(f"{inspect.currentframe().f_code.co_name}: Starting...")
+    print(
+        f"Creating catalog files in directory '{S3_URI}' with name '{CAT_NAME}.csv' and '{CAT_NAME}.json'"
+    )
     builder.save(
         name=cat_name,
         directory=cat_directory,
@@ -163,24 +194,19 @@ def export_catalog_files(builder, cat_directory, cat_name):
 def main():
     """Runs the catalog-building process and measures execution time."""
 
+    print("Starting script build_hdp_catalog.py")
+
     start_time = time.time()
 
-    hdp_builder = init_builder()
+    zarr_paths = get_zarr_paths()
 
-    print(
-        "WARNING: this step may take a several minutes-- even up to an hour or two-- to run as ecgtools crawls through the s3 catalog."
-    )
+    hdp_builder = init_builder(zarr_paths)
+
     hdp_builder = build_catalog(hdp_builder)
 
-    print(
-        f"Creating catalog files in directory '{S3_URI}' with name '{CAT_NAME}.csv' and '{CAT_NAME}.json'"
-    )
     export_catalog_files(hdp_builder, S3_URI, CAT_NAME)
-    print("Catalog files successfully created!")
 
-    print(f"Updating 'catalog_file' key in {CAT_NAME}.json to point to https url...")
     update_catalog_file_key(S3_URI, HTTP_URL, CAT_NAME)
-    print(f"{CAT_NAME}.json successfully modified.")
 
     end_time = time.time()
     elapsed_time = end_time - start_time
