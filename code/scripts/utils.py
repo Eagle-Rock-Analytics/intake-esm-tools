@@ -7,6 +7,7 @@ Helper functions common to multiple catalog generation scripts
 import json
 import fsspec
 
+
 def update_catalog_file_key(s3_uri: str, https_url: str, cat_name: str) -> None:
     """
     Update the "catalog_file" key in a JSON catalog stored at an S3 URI.
