@@ -168,7 +168,7 @@ def main():
     hdp_builder = init_builder()
 
     print(
-        "WARNING: this step may take a few minutes to run as ecgtools crawls through the s3 catalog."
+        "WARNING: this step may take a several minutes-- even up to an hour or two-- to run as ecgtools crawls through the s3 catalog."
     )
     hdp_builder = build_catalog(hdp_builder)
 
