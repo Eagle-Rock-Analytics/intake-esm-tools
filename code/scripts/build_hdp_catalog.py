@@ -56,7 +56,7 @@ def parse_hdp_data(filepath):
     """
     try:
         # Get the data info from the filepath
-        network, station_id, _ = filepath.split(S3_URI)[1].split("/")
+        network, station_id = filepath.split(S3_URI + "/")[1].split("/")
         # Remove .zmetadata from the filepath, since the actual path to the zarr doesn't include this
         filepath = filepath.split(".zmetadata")[0]
     except Exception as e:
