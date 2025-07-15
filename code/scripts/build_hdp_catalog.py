@@ -28,12 +28,12 @@ from ecgtools.builder import INVALID_ASSET, TRACEBACK
 from utils import update_catalog_file_key
 
 
-S3_URI = "s3://wecc-historical-wx/4_merge_wx"  # Directory to store output files in
+S3_URI = "s3://cadcat/histwxstns"  # Directory to store output files in
 CAT_NAME = "era-hdp-collection"  # Name to give catalog csv and json files (don't include file extension)
 
 # Public HTTPS base URL for catalog files
 # NEED TO REPLACE AND RERUN ONCE WE HAVE PUBLIC-FACING HTTP URL
-HTTP_URL = "s3://wecc-historical-wx/4_merge_wx"
+HTTP_URL = "https://cadcat.s3.amazonaws.com/index.html#histwxstns"
 
 
 def parse_hdp_data(filepath):
