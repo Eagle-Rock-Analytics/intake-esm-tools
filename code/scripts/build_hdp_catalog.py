@@ -33,7 +33,7 @@ CAT_NAME = "era-hdp-collection"  # Name to give catalog csv and json files (don'
 
 # Public HTTPS base URL for catalog files
 # NEED TO REPLACE AND RERUN ONCE WE HAVE PUBLIC-FACING HTTP URL
-HTTP_URL = "https://cadcat.s3.amazonaws.com/index.html#histwxstns"
+HTTP_URL = "https://cadcat.s3.amazonaws.com/histwxstns"
 
 
 def parse_hdp_data(filepath):
