@@ -26,8 +26,6 @@ build_catalog()
     Creates and builds the catalog using `ecgtools.Builder`.
 export_catalog_files(builder, cat_directory, cat_name)
     Saves the catalog as JSON and CSV files.
- update_catalog_file_key(s3_urihttps_url, cat_name):
-    Update the "catalog_file" key in a JSON catalog stored at an S3 URI.
 main()
     Executes the catalog-building process.
 
@@ -45,10 +43,9 @@ To build and export the catalog, run:
 
 import traceback
 import time
-import json
-import fsspec
 from ecgtools import Builder
 from ecgtools.builder import INVALID_ASSET, TRACEBACK
+from utils import update_catalog_file_key
 
 S3_URI = "s3://wfclimres/era"  # Directory to store output files in
 HTTP_URL = (
@@ -183,7 +180,7 @@ def build_catalog():
 
 
 def export_catalog_files(builder, cat_directory, cat_name):
-    """Export catalog json and csv files to local drive
+    """Export catalog json and csv files
 
     Parameters
     ---------
@@ -225,40 +222,6 @@ def export_catalog_files(builder, cat_directory, cat_name):
         ],
         description="Eagle Rock Analytics Renewables Data Catalog",
     )
-
-
-def update_catalog_file_key(s3_uri: str, https_url: str, cat_name: str) -> None:
-    """
-    Update the "catalog_file" key in a JSON catalog stored at an S3 URI.
-
-    This function modifies an Intake-ESM JSON catalog by injecting (or updating) the "catalog_file"
-    field, which points to a public HTTPS URL for the associated CSV file. This is necessary
-    because Intake-ESM cannot read from S3 URIs (e.g., 's3://bucket/path/file.csv') directly when
-    using the `catalog_file` key. Intake expects a web-accessible HTTPS URL or a local path for public data.
-
-    Parameters
-    ----------
-    s3_uri : str
-        Base S3 URI where the catalog JSON is stored (e.g., 's3://mybucket/catalogs').
-    https_url : str
-        Public HTTPS URL where the CSV catalog will be accessible.
-    cat_name : str
-        Catalog name (used for both JSON and CSV filenames).
-
-    Returns
-    -------
-    None
-        Modifies the JSON file in-place by injecting or updating the "catalog_file" key.
-    """
-    json_path = f"{s3_uri}/{cat_name}.json"
-
-    with fsspec.open(json_path, "r") as f:
-        catalog = json.load(f)
-
-    catalog["catalog_file"] = f"{https_url}/{cat_name}.csv"
-
-    with fsspec.open(json_path, "w") as f:
-        json.dump(catalog, f, indent=2)
 
 
 def main():

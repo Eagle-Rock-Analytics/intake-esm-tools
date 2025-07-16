@@ -8,17 +8,32 @@ This script performs the following steps:
 3. Cleans and builds a catalog of valid assets.
 4. Saves the catalog files (CSV and JSON) back to the same S3 directory.
 
-Catalog is saved with name defined in CAT_NAME, and written to ROOT_DIR.
+Attributes
+----------
+S3_URI : str
+    s3 directory where the output catalog files will be stored.
+HTTP_URL: str
+    Public HTTPS base URL for catalog files
+CAT_NAME : str
+    Name of the catalog files (without file extension).
+    
 """
 
 import traceback
 import time
 import inspect
+import s3fs
 from ecgtools import Builder
 from ecgtools.builder import INVALID_ASSET, TRACEBACK
+from utils import update_catalog_file_key
 
+
+S3_URI = "s3://cadcat/histwxstns"  # Directory to store output files in
 CAT_NAME = "era-hdp-collection"  # Name to give catalog csv and json files (don't include file extension)
-ROOT_DIR = "s3://wecc-historical-wx/4_merge_wx/"  # Root directory to data on S3 (and, where the catalog files will go)
+
+# Public HTTPS base URL for catalog files
+# NEED TO REPLACE AND RERUN ONCE WE HAVE PUBLIC-FACING HTTP URL
+HTTP_URL = "https://cadcat.s3.amazonaws.com/histwxstns"
 
 
 def parse_hdp_data(filepath):
@@ -42,7 +57,7 @@ def parse_hdp_data(filepath):
     """
     try:
         # Get the data info from the filepath
-        network, station_id, _ = filepath.split(ROOT_DIR)[1].split("/")
+        network, station_id, _ = filepath.split(S3_URI + "/")[1].split("/")
         # Remove .zmetadata from the filepath, since the actual path to the zarr doesn't include this
         filepath = filepath.split(".zmetadata")[0]
     except Exception as e:
@@ -56,9 +71,43 @@ def parse_hdp_data(filepath):
     return info
 
 
-def init_builder():
+def get_zarr_paths():
+    """
+    Retrieve paths to zarr stores for each HDP station using fs.glob
+
+    Returns
+    --------
+    list of string
+        Paths to zarr stores for each station
+
+    """
+    print(f"{inspect.currentframe().f_code.co_name}: Starting...")
+    print(
+        "Warning: This function may take a while as it crawls through the s3 bucket looking for files"
+    )
+
+    fs = s3fs.S3FileSystem()
+    glob_s3 = fs.glob(f"{S3_URI}/**/**/.zmetadata")
+    zarr_paths = [
+        "s3://" + file.split(".zmetadata")[0] for file in glob_s3
+    ]  # Remove .zmetadata from the path
+    zarr_paths = [
+        path for path in zarr_paths if "VALLEYWATER" not in path
+    ]  # Remove VALLEYWATER stations
+
+    print(f"{inspect.currentframe().f_code.co_name}: Completed successfully")
+
+    return zarr_paths
+
+
+def init_builder(zarr_paths):
     """
     Initializes the ecgtools Builder object with crawl settings for HDP.
+
+    Parameters
+    ----------
+    zarr_paths: list of string
+        Paths to zarr stores for each station
 
     Returns
     -------
@@ -67,15 +116,9 @@ def init_builder():
     """
     print(f"{inspect.currentframe().f_code.co_name}: Starting...")
 
-    exclude_patterns = [
-        "**/VALLEYWATER/**",
-        "**/eraqc_counts/**",
-        "**/qaqc_logs/**",
-    ]  # Glob patterns to exclude (don't crawl through these directories or include these files)
     builder = Builder(
-        paths=[ROOT_DIR],
-        depth=2,  # Crawl through 2 directories
-        exclude_patterns=exclude_patterns,
+        paths=zarr_paths,
+        depth=0,  # No crawling
         include_patterns=["**/.zmetadata"],  # Glob patterns to include
     )
     print(f"{inspect.currentframe().f_code.co_name}: Completed successfully")
@@ -103,19 +146,30 @@ def build_catalog(builder_obj):
     return builder_obj
 
 
-def save_builder(builder_obj):
-    """
-    Saves the catalog to the ROOT_DIR with intake-ESM configuration.
+def export_catalog_files(builder, cat_directory, cat_name):
+    """Export catalog json and csv files
 
     Parameters
-    ----------
-    builder_obj : ecgtools.builder.Builder
-        The Builder object containing the parsed catalog data.
+    ---------
+    builder: ecgtools.builder.Builder
+        Pre-built builder object
+    cat_directory: str
+        Directory to save the output catalog files
+    cat_name: str
+        Name to give the catalog (no file extension)
+
+    Returns
+    -------
+    None
+
     """
     print(f"{inspect.currentframe().f_code.co_name}: Starting...")
-    builder_obj.save(
-        name=CAT_NAME,
-        directory=ROOT_DIR,
+    print(
+        f"Creating catalog files in directory '{S3_URI}' with name '{CAT_NAME}.csv' and '{CAT_NAME}.json'"
+    )
+    builder.save(
+        name=cat_name,
+        directory=cat_directory,
         # Column name including filepath
         path_column_name="path",
         # Column name including variables
@@ -138,27 +192,25 @@ def save_builder(builder_obj):
 
 
 def main():
-    """
-    Main execution routine to build and upload the HDP intake-ESM catalog.
-    """
+    """Runs the catalog-building process and measures execution time."""
+
+    print("Starting script build_hdp_catalog.py")
 
     start_time = time.time()
-    print("Started running build_hdp_catalog.py")
 
-    # Initialize the builder
-    builder = init_builder()
+    zarr_paths = get_zarr_paths()
 
-    # Actually build the catalog
-    builder = build_catalog(builder)
+    hdp_builder = init_builder(zarr_paths)
 
-    # Upload catalog to s3
-    save_builder(builder)
+    hdp_builder = build_catalog(hdp_builder)
 
-    # Print elapsed time
-    elapsed = int(time.time() - start_time)
-    print(f"Elapsed time: {elapsed//3600:02}:{(elapsed%3600)//60:02}:{elapsed%60:02}")
+    export_catalog_files(hdp_builder, S3_URI, CAT_NAME)
 
-    print("Script complete.")
+    update_catalog_file_key(S3_URI, HTTP_URL, CAT_NAME)
+
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print(f"Script complete!\n Total execution time: {elapsed_time:.2f} seconds.")
 
 
 if __name__ == "__main__":
