@@ -91,9 +91,6 @@ def get_zarr_paths():
     zarr_paths = [
         "s3://" + file.split(".zmetadata")[0] for file in glob_s3
     ]  # Remove .zmetadata from the path
-    zarr_paths = [
-        path for path in zarr_paths if "VALLEYWATER" not in path
-    ]  # Remove VALLEYWATER stations
 
     print(f"{inspect.currentframe().f_code.co_name}: Completed successfully")
 
