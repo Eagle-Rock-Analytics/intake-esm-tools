@@ -1,0 +1,21 @@
+sources:
+  standard_met_year:
+    description: Standard Meteorological Year climate data with various variables
+      and percentiles
+    driver: csv
+    args:
+      urlpath: cae-standard-met-year-collection.csv
+      csv_kwargs:
+        dtype:
+          station_name: str
+          variable: str
+          percentile: str
+          time_period: str
+          path: str
+    metadata:
+      fields:
+        station_name: Weather station name
+        variable: Climate variable (t2, rh_derived, wind_speed_derived, swdnb, noaa_heat_index_derived)
+        percentile: Percentile value (05ptile, 50ptile, 95ptile)
+        time_period: Time period (present-day, near-future, mid-century, mid-late-century)
+        path: File path (local or S3)

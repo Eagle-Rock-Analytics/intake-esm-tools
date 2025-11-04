@@ -1,0 +1,41 @@
+{
+  "esmcat_version": "0.0.1",
+  "attributes": [
+    {
+      "column_name": "network_id",
+      "vocabulary": ""
+    },
+    {
+      "column_name": "station_id",
+      "vocabulary": ""
+    },
+    {
+      "column_name": "path",
+      "vocabulary": ""
+    }
+  ],
+  "assets": {
+    "column_name": "path",
+    "format": "zarr",
+    "format_column_name": null
+  },
+  "aggregation_control": {
+    "variable_column_name": "station_id",
+    "groupby_attrs": [
+      "network_id",
+      "station_id"
+    ],
+    "aggregations": [
+      {
+        "type": "union",
+        "attribute_name": "station_id",
+        "options": {}
+      }
+    ]
+  },
+  "id": "era-hdp-collection",
+  "description": "Eagle Rock Analytics Historical Data Platform Catalog",
+  "title": null,
+  "last_updated": "2025-07-23T20:05:12Z",
+  "catalog_file": "https://cadcat.s3.amazonaws.com/histwxstns/era-hdp-collection.csv"
+}
