@@ -3,6 +3,7 @@ channels:
   - conda-forge
 dependencies:
   - python=3.10.16
+  - boto3
   - ecgtools=2024.7.31
   - intake=2.0.8
   - intake-esm=2025.2.3

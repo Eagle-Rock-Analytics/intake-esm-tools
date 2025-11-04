@@ -1,0 +1,22 @@
+sources:
+  typical_met_year:
+    description: Typical Meteorological Year (TMY) climate data
+    driver: csv
+    args:
+      urlpath: cae-typical-met-year-collection.csv
+      csv_kwargs:
+        dtype:
+          station_name: str
+          activity_id: str
+          source_id: str
+          member_id: str
+          time_period: str
+          path: str
+    metadata:
+      fields:
+        station_name: Weather station name
+        activity_id: Downscaling method
+        source_id: Climate model source (e.g., mpi-esm1-2-hr, miroc6)
+        member_id: Ensemble member identifier (e.g., r1i1p1f1, r3i1p1f1)
+        time_period: 30-year time period (present-day, near-future, mid-century, mid-late-century)
+        path: File path in S3
