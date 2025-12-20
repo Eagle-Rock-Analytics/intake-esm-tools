@@ -163,7 +163,7 @@ def generate_catalog(s3_bucket: str, s3_prefix: str) -> None:
                         "member_id": "str",
                         "time_period": "str",
                         "path": "str",
-                    }
+                    },
                 },
                 "metadata": {
                     "fields": {
