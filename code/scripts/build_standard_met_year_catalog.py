@@ -152,14 +152,12 @@ def generate_catalog(s3_bucket: str, s3_prefix: str) -> None:
                 "driver": "csv",
                 "args": {
                     "urlpath": OUTPUT_CSV_FILEPATH,
-                    "csv_kwargs": {
-                        "dtype": {
-                            "station_name": "str",
-                            "variable": "str",
-                            "percentile": "str",
-                            "time_period": "str",
-                            "path": "str",
-                        }
+                    "dtype": {
+                        "station_name": "str",
+                        "variable": "str",
+                        "percentile": "str",
+                        "time_period": "str",
+                        "path": "str",
                     },
                 },
                 "metadata": {
