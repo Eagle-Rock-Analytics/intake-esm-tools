@@ -150,10 +150,17 @@ def generate_catalog(s3_bucket: str, s3_prefix: str) -> None:
 
     # Write YAML definition
 
+    # Build templated URL path for parametrized access
+    templated_urlpath = (
+        "s3://" + BUCKET_NAME + "/" + PREFIX + "/typical-met-year/"
+        "{{station_id}}/{{source_id}}/{{time_period}}/"
+        "tmy_{{station_id}}_{{activity_id}}_{{source_id}}_{{member_id}}_{{time_period}}.csv"
+    )
+
     catalog_def = {
         "sources": {
-            "typical_met_year": {
-                "description": "Typical Meteorological Year (TMY) climate data",
+            "metadata": {
+                "description": "Metadata catalog listing all available TMY datasets",
                 "driver": "csv",
                 "args": {
                     "urlpath": OUTPUT_CSV_FILEPATH,
@@ -176,7 +183,36 @@ def generate_catalog(s3_bucket: str, s3_prefix: str) -> None:
                         "path": "File path in S3",
                     }
                 },
-            }
+            },
+            "typical_met_year": {
+                "description": "Typical Meteorological Year (TMY) climate data with parametrized access",
+                "driver": "csv",
+                "parameters": {
+                    "station_id": {
+                        "description": "Weather station identifier (e.g., 'arcata_eureka_airport_kacv')",
+                        "type": "str",
+                    },
+                    "source_id": {
+                        "description": "Climate model source (e.g., 'ec-earth3', 'miroc6', 'mpi-esm1-2-hr', 'taiesm1')",
+                        "type": "str",
+                    },
+                    "time_period": {
+                        "description": "30-year time period ('present-day', 'near-future', 'mid-century', 'mid-late-century')",
+                        "type": "str",
+                    },
+                    "member_id": {
+                        "description": "Ensemble member identifier (e.g., 'r1i1p1f1', 'r3i1p1f1')",
+                        "type": "str",
+                    },
+                    "activity_id": {
+                        "description": "Downscaling methodology",
+                        "type": "str",
+                    },
+                },
+                "args": {
+                    "urlpath": templated_urlpath,
+                },
+            },
         }
     }
 
