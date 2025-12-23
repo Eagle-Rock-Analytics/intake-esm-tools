@@ -3,6 +3,7 @@ build_standard_met_year_catalog.py
 
 Generate intake catalog for standard-met-year dataset from S3.
 Creates CSV file with metadata for each file and YAML definition for intake catalog
+Uploads catalog files to AWS 
 
 """
 
@@ -11,8 +12,8 @@ from pathlib import Path
 from typing import Optional, Dict
 import pandas as pd
 import yaml
+import s3fs
 import boto3
-
 
 # S3 configuration
 BUCKET_NAME = "cadcat"
@@ -20,8 +21,9 @@ PREFIX = "climate-profiles"
 
 # Output filepaths
 CATALOG_FILENAME = "cae-standard-met-year-collection"  # Filename no extension
-OUTPUT_CSV_FILEPATH = f"{CATALOG_FILENAME}.csv"
-OUTPUT_YAML_FILEPATH = f"{CATALOG_FILENAME}.yaml"
+AWS_PATH = "s3://cadcat/climate-profiles/"
+OUTPUT_CSV_FILEPATH = f"{AWS_PATH}{CATALOG_FILENAME}.csv"
+OUTPUT_YAML_FILEPATH = f"{AWS_PATH}{CATALOG_FILENAME}.yaml"
 
 
 def parse_stdyr_filename(filename: str) -> Optional[Dict[str, str]]:
@@ -32,20 +34,20 @@ def parse_stdyr_filename(filename: str) -> Optional[Dict[str, str]]:
     ----------
     filename : str
         Filename to parse following pattern:
-        stdyr_[VARIABLE]_[PERCENTILE]_[STATION_NAME]_[TIME_PERIOD].csv
+        stdyr_[VARIABLE]_[PERCENTILE]_[STATION_ID]_[TIME_PERIOD].csv
 
     Returns
     -------
     dict or None
         Dictionary containing parsed metadata with keys:
-        - station_name : str
+        - station_id : str
         - variable : str
         - percentile : str
         - time_period : str
         - filename : str
         Returns None if filename cannot be parsed.
     """
-    # Pattern: stdyr_[VARIABLE]_[PERCENTILE]_[STATION_NAME]_[TIME_PERIOD].csv
+    # Pattern: stdyr_[VARIABLE]_[PERCENTILE]_[station_id]_[TIME_PERIOD].csv
     # VARIABLE can contain underscores, PERCENTILE is like "05ptile", "50ptile", "95ptile"
     pattern = r"stdyr_(.+)_(\d{2}ptile)_(.+)_([^_]+)\.csv$"
     match = re.match(pattern, filename)
@@ -53,10 +55,10 @@ def parse_stdyr_filename(filename: str) -> Optional[Dict[str, str]]:
     if not match:
         return None
 
-    variable, percentile, station_name, time_period = match.groups()
+    variable, percentile, station_id, time_period = match.groups()
 
     return {
-        "station_name": station_name,
+        "station_id": station_id,
         "variable": variable,
         "percentile": percentile,
         "time_period": time_period,
@@ -121,7 +123,7 @@ def generate_catalog(s3_bucket: str, s3_prefix: str) -> None:
 
             entries.append(
                 {
-                    "station_name": metadata["station_name"],
+                    "station_id": metadata["station_id"],
                     "variable": metadata["variable"],
                     "percentile": metadata["percentile"],
                     "time_period": metadata["time_period"],
@@ -137,7 +139,7 @@ def generate_catalog(s3_bucket: str, s3_prefix: str) -> None:
 
     # Create DataFrame and write CSV catalog
     df = pd.DataFrame(entries)
-    df = df.sort_values(["station_name", "variable", "percentile", "time_period"])
+    df = df.sort_values(["station_id", "variable", "percentile", "time_period"])
 
     df.to_csv(OUTPUT_CSV_FILEPATH, index=False)
 
@@ -153,7 +155,7 @@ def generate_catalog(s3_bucket: str, s3_prefix: str) -> None:
                 "args": {
                     "urlpath": OUTPUT_CSV_FILEPATH,
                     "dtype": {
-                        "station_name": "str",
+                        "station_id": "str",
                         "variable": "str",
                         "percentile": "str",
                         "time_period": "str",
@@ -162,7 +164,7 @@ def generate_catalog(s3_bucket: str, s3_prefix: str) -> None:
                 },
                 "metadata": {
                     "fields": {
-                        "station_name": "Weather station name",
+                        "station_id": "Weather station name",
                         "variable": "Climate variable (t2, rh_derived, wind_speed_derived, swdnb, noaa_heat_index_derived)",
                         "percentile": "Percentile value (05ptile, 50ptile, 95ptile)",
                         "time_period": "Time period (present-day, near-future, mid-century, mid-late-century)",
@@ -173,7 +175,8 @@ def generate_catalog(s3_bucket: str, s3_prefix: str) -> None:
         }
     }
 
-    with open(OUTPUT_YAML_FILEPATH, "w") as f:
+    fs = s3fs.S3FileSystem()
+    with fs.open(OUTPUT_YAML_FILEPATH, "w") as f:
         yaml.dump(catalog_def, f, default_flow_style=False, sort_keys=False)
 
     print(f"✓ Created YAML definition: {OUTPUT_YAML_FILEPATH}")
@@ -181,7 +184,7 @@ def generate_catalog(s3_bucket: str, s3_prefix: str) -> None:
     # Print summary statistics
     print("\n=== Catalog Summary ===")
     print(f"Total files: {len(entries)}")
-    print(f"Stations: {df['station_name'].nunique()}")
+    print(f"Stations: {df['station_id'].nunique()}")
     print(f"Variables: {df['variable'].nunique()}")
     print(f"  {', '.join(sorted(df['variable'].unique()))}")
     print(f"Percentiles: {df['percentile'].nunique()}")
