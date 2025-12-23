@@ -12,7 +12,7 @@ from typing import Optional, Dict
 import pandas as pd
 import yaml
 import boto3
-
+import s3fs
 
 # S3 configuration
 BUCKET_NAME = "cadcat"
@@ -20,8 +20,9 @@ PREFIX = "climate-profiles"
 
 # Output filepaths
 CATALOG_FILENAME = "cae-typical-met-year-collection"  # Filename no extension
-OUTPUT_CSV_FILEPATH = f"{CATALOG_FILENAME}.csv"
-OUTPUT_YAML_FILEPATH = f"{CATALOG_FILENAME}.yaml"
+AWS_PATH = "s3://cadcat/climate-profiles/"
+OUTPUT_CSV_FILEPATH = f"{AWS_PATH}{CATALOG_FILENAME}.csv"
+OUTPUT_YAML_FILEPATH = f"{AWS_PATH}{CATALOG_FILENAME}.yaml"
 
 
 def parse_tmy_filename(filename: str) -> Optional[Dict[str, str]]:
@@ -32,13 +33,13 @@ def parse_tmy_filename(filename: str) -> Optional[Dict[str, str]]:
     ----------
     filename : str
         Filename to parse following pattern:
-        tmy_[STATION_NAME]_[ACTIVITY_ID]_[SOURCE_ID]_[MEMBER_ID]_[TIME_PERIOD].(csv|epw)
+        tmy_[station_id]_[ACTIVITY_ID]_[SOURCE_ID]_[MEMBER_ID]_[TIME_PERIOD].(csv|epw)
 
     Returns
     -------
     dict or None
         Dictionary containing parsed metadata with keys:
-        - station_name : str
+        - station_id : str
         - activity_id : str
         - source_id : str
         - member_id : str
@@ -46,17 +47,17 @@ def parse_tmy_filename(filename: str) -> Optional[Dict[str, str]]:
         - filename : str
         Returns None if filename cannot be parsed.
     """
-    # Pattern: tmy_[STATION_NAME]_[ACTIVITY_ID]_[SOURCE_ID]_[MEMBER_ID]_[TIME_PERIOD].(csv|epw)
+    # Pattern: tmy_[STATION_ID]_[ACTIVITY_ID]_[SOURCE_ID]_[MEMBER_ID]_[TIME_PERIOD].(csv|epw)
     pattern = r"tmy_(.+)_(wrf)_([^_]+)_([^_]+)_([^_]+)\.(csv|epw)$"
     match = re.match(pattern, filename)
 
     if not match:
         return None
 
-    station_name, activity_id, source_id, member_id, time_period, _ = match.groups()
+    station_id, activity_id, source_id, member_id, time_period, _ = match.groups()
 
     return {
-        "station_name": station_name,
+        "station_id": station_id,
         "activity_id": activity_id,
         "source_id": source_id,
         "member_id": member_id,
@@ -122,7 +123,7 @@ def generate_catalog(s3_bucket: str, s3_prefix: str) -> None:
 
             entries.append(
                 {
-                    "station_name": metadata["station_name"],
+                    "station_id": metadata["station_id"],
                     "activity_id": metadata["activity_id"],
                     "source_id": metadata["source_id"],
                     "member_id": metadata["member_id"],
@@ -140,7 +141,7 @@ def generate_catalog(s3_bucket: str, s3_prefix: str) -> None:
     # Create DataFrame and write CSV catalog
     df = pd.DataFrame(entries)
     df = df.sort_values(
-        ["station_name", "activity_id", "source_id", "member_id", "time_period"]
+        ["station_id", "activity_id", "source_id", "member_id", "time_period"]
     )
 
     df.to_csv(OUTPUT_CSV_FILEPATH, index=False)
@@ -156,20 +157,18 @@ def generate_catalog(s3_bucket: str, s3_prefix: str) -> None:
                 "driver": "csv",
                 "args": {
                     "urlpath": OUTPUT_CSV_FILEPATH,
-                    "csv_kwargs": {
-                        "dtype": {
-                            "station_name": "str",
-                            "activity_id": "str",
-                            "source_id": "str",
-                            "member_id": "str",
-                            "time_period": "str",
-                            "path": "str",
-                        }
+                    "dtype": {
+                        "station_id": "str",
+                        "activity_id": "str",
+                        "source_id": "str",
+                        "member_id": "str",
+                        "time_period": "str",
+                        "path": "str",
                     },
                 },
                 "metadata": {
                     "fields": {
-                        "station_name": "Weather station name",
+                        "station_id": "Weather station name",
                         "activity_id": "Downscaling method",
                         "source_id": "Climate model source (e.g., mpi-esm1-2-hr, miroc6)",
                         "member_id": "Ensemble member identifier (e.g., r1i1p1f1, r3i1p1f1)",
@@ -181,7 +180,8 @@ def generate_catalog(s3_bucket: str, s3_prefix: str) -> None:
         }
     }
 
-    with open(OUTPUT_YAML_FILEPATH, "w") as f:
+    fs = s3fs.S3FileSystem()
+    with fs.open(OUTPUT_YAML_FILEPATH, "w") as f:
         yaml.dump(catalog_def, f, default_flow_style=False, sort_keys=False)
 
     print(f"✓ Created YAML definition: {OUTPUT_YAML_FILEPATH}")
@@ -189,7 +189,7 @@ def generate_catalog(s3_bucket: str, s3_prefix: str) -> None:
     # Print summary statistics
     print("\n=== Catalog Summary ===")
     print(f"Total files: {len(entries)}")
-    print(f"Stations: {df['station_name'].nunique()}")
+    print(f"Stations: {df['station_id'].nunique()}")
     print(f"Source models: {df['source_id'].nunique()}")
     print(f"  {', '.join(sorted(df['source_id'].unique()))}")
     print(f"Time periods: {df['time_period'].nunique()}")
