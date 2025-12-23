@@ -147,10 +147,17 @@ def generate_catalog(s3_bucket: str, s3_prefix: str) -> None:
 
     # Write YAML definition
 
+    # Build templated URL path for parametrized access
+    templated_urlpath = (
+        "s3://" + BUCKET_NAME + "/" + PREFIX + "/standard-met-year/"
+        "{{station_id}}/{{variable}}/{{percentile}}/{{time_period}}/"
+        "stdyr_{{variable}}_{{percentile}}_{{station_id}}_{{time_period}}.csv"
+    )
+
     catalog_def = {
         "sources": {
-            "standard_met_year": {
-                "description": "Standard Meteorological Year climate data with various variables and percentiles",
+            "metadata": {
+                "description": "Metadata catalog listing all available Standard Meteorological Year datasets",
                 "driver": "csv",
                 "args": {
                     "urlpath": OUTPUT_CSV_FILEPATH,
@@ -168,10 +175,35 @@ def generate_catalog(s3_bucket: str, s3_prefix: str) -> None:
                         "variable": "Climate variable (t2, rh_derived, wind_speed_derived, swdnb, noaa_heat_index_derived)",
                         "percentile": "Percentile value (05ptile, 50ptile, 95ptile)",
                         "time_period": "Time period (present-day, near-future, mid-century, mid-late-century)",
-                        "path": "File path (local or S3)",
+                        "path": "File path in S3",
                     }
                 },
-            }
+            },
+            "standard_met_year": {
+                "description": "Standard Meteorological Year climate data with parametrized access",
+                "driver": "csv",
+                "parameters": {
+                    "station_id": {
+                        "description": "Weather station identifier (e.g., 'palm_springs_regional_airport_kpsp')",
+                        "type": "str",
+                    },
+                    "variable": {
+                        "description": "Climate variable (e.g., 't2', 'rh_derived', 'wind_speed_derived', 'swdnb', 'noaa_heat_index_derived')",
+                        "type": "str",
+                    },
+                    "percentile": {
+                        "description": "Statistical percentile ('05ptile', '50ptile', '95ptile')",
+                        "type": "str",
+                    },
+                    "time_period": {
+                        "description": "Global warming level period ('present-day', 'near-future', 'mid-century', 'mid-late-century')",
+                        "type": "str",
+                    },
+                },
+                "args": {
+                    "urlpath": templated_urlpath,
+                },
+            },
         }
     }
 
